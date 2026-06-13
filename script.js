@@ -6,9 +6,9 @@
 // -------------------------------------------------------
 //  CONFIG
 // -------------------------------------------------------
-// On Vercel, your frontend and API live on the SAME domain,
-// so we use a relative path. No need to change this.
-const SERVER_URL = '';
+// URL of your backend server (server.js).
+// While testing locally, this is usually http://localhost:3000
+const SERVER_URL = 'http://localhost:3000';
 
 // -------------------------------------------------------
 //  Cart State (persisted in localStorage)
@@ -105,49 +105,122 @@ function showToast(msg) {
 }
 
 // -------------------------------------------------------
-//  Paneer Card (index.html only — safe to call on other pages, will silently skip)
+//  Product Quantity Cards (works for ANY number of products
+//  using classes instead of ids — e.g. Paneer, Dahi, etc.)
+//
+//  HTML structure expected per card:
+//    <div class="product-card">
+//      <div class="qty-row">
+//        <button class="qty-btn btn-minus">−</button>
+//        <input class="qty-input card-qty" value="100" step="100">
+//        <button class="qty-btn btn-plus">+</button>
+//      </div>
+//      <button onclick="openModal('Product Name', pricePer100g)">Add to Cart</button>
+//    </div>
+//
+//  The price passed to openModal is the price PER 100g.
 // -------------------------------------------------------
-const RATE = 420;   // ₹420 per kg
-let cardGrams = 100;
+
+function calcPrice(grams, ratePer100g) {
+    return Math.round((grams / 100) * ratePer100g);
+}
+
+// Currently open modal's state
+let modalProductName = '';
+let modalRate = 0;     // price per 100g for the open product
 let modalGrams = 100;
 
-function calcPrice(g) {
-    return Math.round((g / 1000) * RATE);
-}
+// Wire up +/- buttons and manual qty input for every product card
+document.addEventListener('DOMContentLoaded', function () {
+    updateCartBadge();
 
-function updateCard() {
-    const qtyEl = document.getElementById('card-qty');
-    const priceEl = document.getElementById('card-price');
-    if (qtyEl) qtyEl.value = cardGrams;
-    if (priceEl) priceEl.textContent = '₹' + calcPrice(cardGrams);
-}
+    document.querySelectorAll('.product-card').forEach(card => {
+        const btnPlus  = card.querySelector('.btn-plus');
+        const btnMinus = card.querySelector('.btn-minus');
+        const qtyInput = card.querySelector('.card-qty');
 
-function openModal() {
-    modalGrams = cardGrams;
-    const mqty = document.getElementById('modal-qty');
+        if (!qtyInput) return; // not a quantity-based product card
+
+        if (btnPlus) {
+            btnPlus.addEventListener('click', () => {
+                let v = parseInt(qtyInput.value) || 100;
+                qtyInput.value = v + 100;
+            });
+        }
+
+        if (btnMinus) {
+            btnMinus.addEventListener('click', () => {
+                let v = parseInt(qtyInput.value) || 100;
+                qtyInput.value = Math.max(100, v - 100);
+            });
+        }
+
+        qtyInput.addEventListener('change', function () {
+            let v = Math.round(parseInt(this.value) / 100) * 100;
+            if (isNaN(v) || v < 100) v = 100;
+            this.value = v;
+        });
+    });
+});
+
+// -------------------------------------------------------
+//  Shared Modal (used by every quantity-based product)
+// -------------------------------------------------------
+
+// `event` is the global click event from the inline onclick handler —
+// we use it to find which product card's qty input to read from.
+function openModal(name, ratePer100g) {
+    modalProductName = name;
+    modalRate = ratePer100g;
+
+    // Find the qty input inside the same product card that was clicked
+    let startGrams = 100;
+    if (typeof event !== 'undefined' && event.target) {
+        const card = event.target.closest('.product-card');
+        const qtyInput = card ? card.querySelector('.card-qty') : null;
+        if (qtyInput) {
+            let v = parseInt(qtyInput.value) || 100;
+            startGrams = v;
+        }
+    }
+
+    modalGrams = startGrams;
+
+    const titleEl = document.getElementById('modal-title');
+    const mqty    = document.getElementById('modal-qty');
+    if (titleEl) titleEl.textContent = name;
     if (mqty) mqty.value = modalGrams;
     updateModalDisplay();
+
     const modal = document.getElementById('modal');
-    if (modal) modal.classList.add('open');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('open');
+    }
 }
 
 function closeModal() {
     const modal = document.getElementById('modal');
-    if (modal) modal.classList.remove('open');
+    if (modal) {
+        modal.classList.remove('open');
+        modal.style.display = 'none';
+    }
 }
 
-function modalQty(delta) {
+function updateModalQty(delta) {
     modalGrams = Math.max(100, modalGrams + delta);
     const mqty = document.getElementById('modal-qty');
     if (mqty) mqty.value = modalGrams;
     updateModalDisplay();
 }
 
-function modalQtyInput(el) {
-    let v = Math.round(parseInt(el.value) / 100) * 100;
+function validateModalInput() {
+    const mqty = document.getElementById('modal-qty');
+    if (!mqty) return;
+    let v = Math.round(parseInt(mqty.value) / 100) * 100;
     if (isNaN(v) || v < 100) v = 100;
     modalGrams = v;
-    el.value = modalGrams;
+    mqty.value = modalGrams;
     updateModalDisplay();
 }
 
@@ -155,31 +228,14 @@ function updateModalDisplay() {
     const qtyDisplay = document.getElementById('modal-qty-display');
     const total = document.getElementById('modal-total');
     if (qtyDisplay) qtyDisplay.textContent = modalGrams + 'g';
-    if (total) total.textContent = '₹' + calcPrice(modalGrams);
+    if (total) total.textContent = '₹' + calcPrice(modalGrams, modalRate);
 }
 
 function confirmOrder() {
-    addToCart('Fresh Paneer (' + modalGrams + 'g)', calcPrice(modalGrams), modalGrams + 'g');
+    const price = calcPrice(modalGrams, modalRate);
+    addToCart(modalProductName + ' (' + modalGrams + 'g)', price, modalGrams + 'g');
     closeModal();
 }
-
-// Wire up paneer card buttons if they exist on this page
-document.addEventListener('DOMContentLoaded', function () {
-    updateCartBadge();
-
-    const btnPlus  = document.getElementById('btn-plus');
-    const btnMinus = document.getElementById('btn-minus');
-    const cardQty  = document.getElementById('card-qty');
-
-    if (btnPlus)  btnPlus.addEventListener('click',  () => { cardGrams += 100; updateCard(); });
-    if (btnMinus) btnMinus.addEventListener('click', () => { if (cardGrams > 100) cardGrams -= 100; updateCard(); });
-    if (cardQty)  cardQty.addEventListener('change', function () {
-        let v = Math.round(parseInt(this.value) / 100) * 100;
-        if (isNaN(v) || v < 100) v = 100;
-        cardGrams = v;
-        updateCard();
-    });
-});
 
 // -------------------------------------------------------
 //  Razorpay Payment (called from cart.html)

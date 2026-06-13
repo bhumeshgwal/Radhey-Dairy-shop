@@ -92,59 +92,65 @@
                     <button class="btn-add-cart" onclick="addToCart('Toned Milk', 55, '1L')">Add to Cart</button>
                 </div>
                 
-                <!-- Paneer card uses the qty-row + modal system (script.js) — leave structure as-is -->
-                <div class="product-card">
-                    <img src="paneer.png" alt="Fresh Paneer">
-                    <h3 class="product-title">Fresh Paneer</h3>
-                    <p class="product-desc">Soft, fresh paneer made daily from pure milk.</p>
-                    <p class="product-price" id="card-price">₹42</p>
-                    <div class="qty-row">
-                        <button class="qty-btn" id="btn-minus">−</button>
-                        <input class="qty-input" id="card-qty" type="number" value="100" min="100" step="100">
-                        <span class="qty-unit">g</span>
-                        <button class="qty-btn" id="btn-plus">+</button>
+      <!-- Paneer card uses the qty-row + modal system (script.js) — leave structure as-is -->
+                    
+                <div class="product-container">
+                
+                    <div class="product-card">
+                        <img src="paneer.png" alt="Fresh Paneer">
+                        <h3 class="product-title">Fresh Paneer</h3>
+                        <p class="product-desc">Soft, fresh paneer made daily from pure milk.</p>
+                        <p class="product-price">₹42 <span style="font-size:0.9rem; font-weight:400;">/100g</span></p>
+                        <div class="qty-row">
+                            <button type="button" class="qty-btn btn-minus">−</button>
+                            <input class="qty-input card-qty" type="number" value="100" min="100" step="100">
+                            <span class="qty-unit">g</span>
+                            <button type="button" class="qty-btn btn-plus">+</button>
+                        </div>
+                        <button type="button" class="btn-add-cart" onclick="openModal('Fresh Paneer', 42)">Add to Cart</button>
                     </div>
-                    <button class="btn-add-cart" onclick="openModal()">Add to Cart</button>
-                </div>
                 
-                <div class="product-card">
-                    <img src="dahi.png" alt="Dahi">
-                    <h3 class="product-title">Fresh Dahi</h3>
-                    <p class="product-desc">Thick and creamy curd, naturally set every morning.</p>
-                    <p class="product-price">₹45</p>
-                    <button class="btn-add-cart" onclick="addToCart('Fresh Dahi', 45, '500g')">Add to Cart</button>
-                </div>
-
-                <!-- ===== ADD MORE PRODUCT CARDS BELOW BY COPYING THE TEMPLATE ABOVE ===== -->
+                    <div class="product-card">
+                        <img src="dahi.png" alt="Fresh Dahi">
+                        <h3 class="product-title">Fresh Dahi</h3>
+                        <p class="product-desc">Soft, fresh Dahi made daily from pure milk.</p>
+                        <p class="product-price">₹12 <span style="font-size:0.9rem; font-weight:400;">/100g</span></p>
+                        <div class="qty-row">
+                            <button type="button" class="qty-btn btn-minus">−</button>
+                            <input class="qty-input card-qty" type="number" value="100" min="100" step="100">
+                            <span class="qty-unit">g</span>
+                            <button type="button" class="qty-btn btn-plus">+</button>
+                        </div>
+                        <button type="button" class="btn-add-cart" onclick="openModal('Fresh Dahi', 12)">Add to Cart</button>
+                    </div>
                 
-            </div>
-        </section>
+                </div>
+            </section>
+        
     </main>
-
-    <!-- ===== Paneer Quantity Modal (controlled by script.js) ===== -->
-    <div class="modal-bg" id="modal">
+        <!-- ===== Paneer Quantity Modal (controlled by script.js) ===== -->
+    <div class="modal-bg" id="modal" style="display: none;">
         <div class="modal">
-            <h3 class="modal-title">Fresh Paneer</h3>
+            <h3 class="modal-title" id="modal-title">Product Name</h3>
             <p class="modal-sub">Choose quantity</p>
-
+        
             <div class="modal-qty-row">
-                <button class="modal-qty-btn" onclick="modalQty(-100)">−</button>
-                <input class="modal-qty-input" id="modal-qty" type="number" value="100" min="100" step="100"
-                       onchange="modalQtyInput(this)">
+                <button type="button" class="modal-qty-btn" onclick="updateModalQty(-100)">−</button>
+                <input class="modal-qty-input" id="modal-qty" type="number" value="100" min="100" step="100" onchange="validateModalInput()">
                 <span class="modal-unit" id="modal-qty-display">100g</span>
-                <button class="modal-qty-btn" onclick="modalQty(100)">+</button>
+                <button type="button" class="modal-qty-btn" onclick="updateModalQty(100)">+</button>
             </div>
-
+        
             <div class="modal-summary">
                 <div class="modal-row total">
                     <span>Total</span>
-                    <span id="modal-total">₹42</span>
+                    <span id="modal-total">₹0</span>
                 </div>
             </div>
-
+        
             <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-                <button class="btn-confirm" onclick="confirmOrder()">Add to Cart</button>
+                <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="button" class="btn-confirm" onclick="confirmOrder()">Add to Cart</button>
             </div>
         </div>
     </div>
