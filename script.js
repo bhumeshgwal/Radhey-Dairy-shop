@@ -6,9 +6,9 @@
 // -------------------------------------------------------
 //  CONFIG
 // -------------------------------------------------------
-// URL of your backend server (server.js).
-// While testing locally, this is usually http://localhost:3000
-const SERVER_URL = 'http://localhost:3000';
+// On Vercel, your frontend and API live on the SAME domain,
+// so we use a relative path. No need to change this.
+const SERVER_URL = '';
 
 // -------------------------------------------------------
 //  Cart State (persisted in localStorage)
