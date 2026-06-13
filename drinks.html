@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soft Drinks | Radhey Dairy</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="nav-logo">
+                <img src="logo.png" alt="Dairy Logo" class="logo-img">
+                <h2 class="logo-text">Radhey Dairy</h2>
+            </a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html"   class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="cart.html"    class="nav-link">Cart</a></li>
+                <li class="nav-item"><a href="#"            class="nav-link">Menu</a></li>
+                <li class="nav-item"><a href="drinks.html"  class="nav-link">Drinks</a></li>
+                <li class="nav-item"><a href="about.html"   class="nav-link">About</a></li>
+                <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section" style="min-height:40vh;">
+            <div class="section-content">
+                <div class="hero-detail">
+                    <h2 class="title">Chilled & Fizzy.</h2>
+                    <h3 class="subtitle">Cool soft drinks to go with every meal!</h3>
+                    <p class="description">From classic colas to refreshing fruit drinks — grab your favourites along with fresh dairy, all in one order.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="product-section" id="drinks-section">
+            <h2 class="section-title">Soft Drinks</h2>
+            <div class="product-container">
+
+                <!-- ============================================================
+                     COPY-PASTE TEMPLATE — duplicate this whole <div class="product-card">
+                     block for every new drink. Just change:
+                       1. img src + alt
+                       2. product-title text
+                       3. product-desc text
+                       4. product-price text (₹ amount)
+                       5. addToCart('NAME', PRICE, 'UNIT') values — must match price shown
+                     ============================================================ -->
+
+                <!-- DRINK 1: Coca-Cola -->
+                <div class="product-card">
+                    <img src="coca-cola.png" alt="Coca-Cola 750ml">
+                    <h3 class="product-title">Coca-Cola</h3>
+                    <h3 class="product-title">750 ml</h3>
+                    <p class="product-desc">Classic chilled cola, perfect with every meal.</p>
+                    <p class="product-price">₹40</p>
+                    <button class="btn-add-cart" onclick="addToCart('Coca-Cola', 40, '750ml')">Add to Cart</button>
+                </div>
+
+                <!-- DRINK 2: Sprite -->
+                <div class="product-card">
+                    <img src="sprite.png" alt="Sprite 750ml">
+                    <h3 class="product-title">Sprite</h3>
+                    <h3 class="product-title">750 ml</h3>
+                    <p class="product-desc">Crisp, refreshing lemon-lime soda.</p>
+                    <p class="product-price">₹40</p>
+                    <button class="btn-add-cart" onclick="addToCart('Sprite', 40, '750ml')">Add to Cart</button>
+                </div>
+
+                <!-- DRINK 3: Fanta -->
+                <div class="product-card">
+                    <img src="fanta.png" alt="Fanta 750ml">
+                    <h3 class="product-title">Fanta</h3>
+                    <h3 class="product-title">750 ml</h3>
+                    <p class="product-desc">Fruity orange flavour, fun and fizzy.</p>
+                    <p class="product-price">₹40</p>
+                    <button class="btn-add-cart" onclick="addToCart('Fanta', 40, '750ml')">Add to Cart</button>
+                </div>
+
+                <!-- DRINK 4: Thums Up -->
+                <div class="product-card">
+                    <img src="thums-up.png" alt="Thums Up 750ml">
+                    <h3 class="product-title">Thums Up</h3>
+                    <h3 class="product-title">750 ml</h3>
+                    <p class="product-desc">Strong, bold cola taste with extra fizz.</p>
+                    <p class="product-price">₹40</p>
+                    <button class="btn-add-cart" onclick="addToCart('Thums Up', 40, '750ml')">Add to Cart</button>
+                </div>
+
+                <!-- DRINK 5: Limca -->
+                <div class="product-card">
+                    <img src="limca.png" alt="Limca 750ml">
+                    <h3 class="product-title">Limca</h3>
+                    <h3 class="product-title">750 ml</h3>
+                    <p class="product-desc">Tangy, refreshing lemon soda.</p>
+                    <p class="product-price">₹40</p>
+                    <button class="btn-add-cart" onclick="addToCart('Limca', 40, '750ml')">Add to Cart</button>
+                </div>
+
+                <!-- DRINK 6: Mountain Dew -->
+                <div class="product-card">
+                    <img src="mountain-dew.png" alt="Mountain Dew 750ml">
+                    <h3 class="product-title">Mountain Dew</h3>
+                    <h3 class="product-title">750 ml</h3>
+                    <p class="product-desc">Sharp citrus kick for an instant energy boost.</p>
+                    <p class="product-price">₹40</p>
+                    <button class="btn-add-cart" onclick="addToCart('Mountain Dew', 40, '750ml')">Add to Cart</button>
+                </div>
+
+                <!-- ===== ADD MORE DRINK CARDS BELOW BY COPYING THE TEMPLATE ABOVE ===== -->
+
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Radhey Dairy. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
