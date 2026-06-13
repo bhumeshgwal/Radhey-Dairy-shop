@@ -377,14 +377,7 @@
 
             // --- Summary ---
             const subtotal  = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            let delivery;
-            if (subtotal < 100) {
-                delivery = 10;          // small orders: flat ₹10 delivery
-            } else if (subtotal >= 300) {
-                delivery = 0;           // free delivery above ₹300
-            } else {
-                delivery = 30;          // standard delivery
-            }
+            const delivery  = subtotal < 100 ? 10 : 0;   // under ₹100 → ₹10, else free
             const grandTotal = subtotal + delivery;
 
             summaryWrapper.innerHTML = `
@@ -402,10 +395,8 @@
                     <span>Delivery</span>
                     <span>${delivery === 0 ? '<span style="color:var(--primary)">Free 🎉</span>' : '₹' + delivery}</span>
                 </div>
-                ${subtotal >= 100 && delivery > 0 ? `<div style="font-size:0.85rem;color:var(--text-secondary);padding:4px 0;">
-                    Add ₹${300 - subtotal} more for free delivery</div>` : ''}
                 ${subtotal < 100 ? `<div style="font-size:0.85rem;color:var(--text-secondary);padding:4px 0;">
-                    Place an order of more than ₹100 for free delivery</div>` : ''}
+                    Add ₹${100 - subtotal} more for free delivery</div>` : ''}
                 <div class="summary-row grand-total">
                     <span>Total</span><span>₹${grandTotal}</span>
                 </div>
@@ -418,11 +409,11 @@
                 <div class="form-row">
                     <div class="form-field">
                         <label for="cust-name">Your Name</label>
-                        <input id="cust-name" type="text" placeholder="Your Name">
+                        <input id="cust-name" type="text" placeholder="Ramesh Kumar">
                     </div>
                     <div class="form-field">
                         <label for="cust-phone">Phone Number</label>
-                        <input id="cust-phone" type="tel" placeholder="+91 xxxxx xxxxx">
+                        <input id="cust-phone" type="tel" placeholder="9876543210">
                     </div>
                 </div>
                 <div class="form-row" style="grid-template-columns:1fr;">
