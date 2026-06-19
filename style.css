@@ -68,11 +68,14 @@ body {
     font-family: var(--font-body);
     background-color: var(--bg-card);
     color: var(--text-primary);
+    overflow-x: hidden; /* stops accidental horizontal scroll on small screens */
 }
 
 ul { list-style: none; }
 a { text-decoration: none; }
 button { cursor: pointer; border: none; background: none; font-family: inherit; }
+
+img { max-width: 100%; }
 
 /* ===== Header & Navigation ===== */
 header {
@@ -90,6 +93,8 @@ header .navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    row-gap: 10px;
 }
 
 .navbar .nav-logo {
@@ -113,6 +118,8 @@ header .navbar {
 .navbar .nav-menu {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .navbar .nav-menu .nav-link { 
@@ -178,6 +185,7 @@ header .navbar {
 .buttons {
     display: flex;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
 .buttons a {
@@ -360,6 +368,7 @@ footer {
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--transition-normal);
+    padding: 15px;
 }
 
 .modal-bg.open {
@@ -793,12 +802,169 @@ footer {
     transform: translateY(-1px);
 }
 
-/* ===== Responsive Adaptations ===== */
+/* ======================================================================
+   ===== RESPONSIVE / MOBILE ADAPTATIONS ===============================
+   ======================================================================
+   Breakpoints:
+     1024px → tablets / small laptops
+     768px  → large phones, small tablets (portrait)
+     480px  → most phones
+   ====================================================================== */
+
+/* ----- Tablets & small laptops ----- */
+@media (max-width: 1024px) {
+    .hero-detail .title { font-size: 3.2rem; }
+    .hero-detail .subtitle { font-size: 1.3rem; }
+    .section-content { gap: var(--space-md); }
+}
+
+/* ----- Large phones / small tablets ----- */
 @media (max-width: 768px) {
-    .contact-title {
-        font-size: 2.5rem;
+    /* --- Navbar: stack logo + links, center everything --- */
+    header .navbar {
+        flex-direction: column;
+        padding: 12px 15px;
+        gap: 10px;
     }
-    .contact-container {
-        gap: var(--space-md);
+
+    .navbar .nav-menu {
+        gap: 6px;
+        width: 100%;
+    }
+
+    .navbar .nav-menu .nav-link {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+
+    .logo-img {
+        width: 48px;
+        height: 40px;
+    }
+
+    .navbar .nav-logo .logo-text {
+        font-size: 1.8rem;
+    }
+
+    /* --- Hero section --- */
+    .hero-section {
+        min-height: auto;
+        padding: var(--space-lg) 0;
+    }
+
+    .section-content {
+        flex-direction: column;
+        text-align: center;
+        padding: 0 20px;
+    }
+
+    .hero-detail {
+        min-width: unset;
+        order: 2;
+    }
+
+    .hero-img-wrapper {
+        min-width: unset;
+        order: 1;
+    }
+
+    .hero-detail .title { font-size: 2.6rem; }
+    .hero-detail .subtitle { font-size: 1.15rem; }
+    .hero-detail .description {
+        font-size: 1rem;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .buttons {
+        justify-content: center;
+    }
+
+    .hero-img {
+        max-height: 320px;
+    }
+
+    /* --- Products --- */
+    .section-title { font-size: 2rem; }
+
+    .product-container {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 14px;
+        padding: 10px;
+    }
+
+    .product-card img { height: 150px; }
+    .product-title { font-size: 1.2rem; }
+    .product-price { font-size: 1.5rem; }
+
+    /* --- Contact --- */
+    .contact-title { font-size: 2.5rem; }
+    .contact-container { gap: var(--space-md); }
+    .contact-info-wrapper { padding-right: 0; }
+}
+
+/* ----- Most phones ----- */
+@media (max-width: 480px) {
+    /* --- Navbar: wrap links into a tighter row --- */
+    .navbar .nav-menu {
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .navbar .nav-menu .nav-link {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    .navbar .nav-logo .logo-text { font-size: 1.5rem; }
+    .logo-img { width: 40px; height: 34px; }
+
+    /* --- Hero --- */
+    .hero-detail .title { font-size: 2rem; }
+    .hero-detail .subtitle { font-size: 1rem; }
+    .hero-detail .description { font-size: 0.95rem; }
+
+    .buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .buttons a {
+        width: 100%;
+        text-align: center;
+        padding: 12px 0;
+    }
+
+    .hero-img { max-height: 240px; }
+
+    /* --- Products: single column, full width cards --- */
+    .product-container {
+        grid-template-columns: 1fr;
+    }
+
+    .product-card img { height: 180px; }
+
+    .btn-add-cart { padding: 12px 20px; }
+
+    /* --- Qty row tighter spacing on tiny screens --- */
+    .qty-row { gap: 6px; }
+    .qty-input { width: 55px; }
+
+    /* --- Modal --- */
+    .modal {
+        width: 95%;
+        padding: var(--space-sm);
+    }
+
+    .modal-qty-row { padding: 8px 10px; }
+
+    /* --- Contact --- */
+    .contact-title { font-size: 1.9rem; }
+    .contact-subtitle { font-size: 1rem; }
+    .form-heading { font-size: 1.5rem; }
+    .info-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
     }
 }
