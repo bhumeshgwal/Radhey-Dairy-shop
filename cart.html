@@ -191,6 +191,67 @@
             border-top: 2px solid var(--border-light);
         }
 
+        /* ===== Payment method selector ===== */
+        .payment-method-box {
+            background: var(--text-white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--space-md);
+        }
+
+        .payment-method-box h3 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            color: var(--text-h1);
+            margin-bottom: var(--space-sm);
+        }
+
+        .pm-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border-light);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .pm-option:hover {
+            border-color: var(--primary-light);
+        }
+
+        .pm-option.selected {
+            border-color: var(--primary);
+            background: rgba(90,158,122,0.07);
+        }
+
+        .pm-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .pm-option-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pm-option-title {
+            font-weight: 500;
+            color: var(--text-heading);
+            font-size: 1rem;
+        }
+
+        .pm-option-sub {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
         /* ===== Customer details form ===== */
         .customer-form {
             background: var(--text-white);
@@ -317,6 +378,9 @@
                 <!-- Order summary — rendered by JS -->
                 <div id="cart-summary-wrapper"></div>
 
+                <!-- Payment method — rendered by JS -->
+                <div id="payment-method-wrapper"></div>
+
                 <!-- Customer details form (shown only when cart has items) -->
                 <div id="customer-form-wrapper"></div>
 
@@ -332,10 +396,14 @@
     <script>
         // ===== Cart Page Renderer =====
 
+        const COD_HANDLING_CHARGE = 5;
+        let paymentMethod = 'online'; // 'online' | 'cod'
+
         function renderCart() {
             const cart = getCart();
             const itemsWrapper   = document.getElementById('cart-items-wrapper');
             const summaryWrapper = document.getElementById('cart-summary-wrapper');
+            const pmWrapper      = document.getElementById('payment-method-wrapper');
             const formWrapper    = document.getElementById('customer-form-wrapper');
 
             if (cart.length === 0) {
@@ -349,6 +417,7 @@
                         </a>
                     </div>`;
                 summaryWrapper.innerHTML = '';
+                pmWrapper.innerHTML      = '';
                 formWrapper.innerHTML    = '';
                 return;
             }
@@ -375,11 +444,13 @@
             itemsHTML += '</div>';
             itemsWrapper.innerHTML = itemsHTML;
 
-            // --- Summary ---
-            const subtotal  = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            const delivery  = subtotal < 100 ? 10 : 0;   // under ₹100 → ₹10, else free
-            const grandTotal = subtotal + delivery;
+            // --- Totals ---
+            const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            const delivery = subtotal < 100 ? 10 : 0;   // under ₹100 → ₹10, else free
+            const handling = paymentMethod === 'cod' ? COD_HANDLING_CHARGE : 0;
+            const grandTotal = subtotal + delivery + handling;
 
+            // --- Summary ---
             summaryWrapper.innerHTML = `
               <div class="cart-summary">
                 <h3 class="summary-title">Order Summary</h3>
@@ -397,12 +468,50 @@
                 </div>
                 ${subtotal < 100 ? `<div style="font-size:0.85rem;color:var(--text-secondary);padding:4px 0;">
                     Add ₹${100 - subtotal} more for free delivery</div>` : ''}
+                ${handling > 0 ? `
+                <div class="summary-row">
+                    <span>COD Handling Charge</span><span>₹${handling}</span>
+                </div>` : ''}
                 <div class="summary-row grand-total">
                     <span>Total</span><span>₹${grandTotal}</span>
                 </div>
               </div>`;
 
+            // --- Payment method selector ---
+            pmWrapper.innerHTML = `
+              <div class="payment-method-box">
+                <h3>Payment Method</h3>
+                <label class="pm-option ${paymentMethod === 'online' ? 'selected' : ''}">
+                    <input type="radio" name="paymentMethod" value="online" ${paymentMethod === 'online' ? 'checked' : ''}>
+                    <div class="pm-option-text">
+                        <span class="pm-option-title">Pay Online</span>
+                        <span class="pm-option-sub">UPI · Cards · Wallets · Net Banking</span>
+                    </div>
+                </label>
+                <label class="pm-option ${paymentMethod === 'cod' ? 'selected' : ''}">
+                    <input type="radio" name="paymentMethod" value="cod" ${paymentMethod === 'cod' ? 'checked' : ''}>
+                    <div class="pm-option-text">
+                        <span class="pm-option-title">Cash on Delivery</span>
+                        <span class="pm-option-sub">+₹${COD_HANDLING_CHARGE} handling charge</span>
+                    </div>
+                </label>
+              </div>`;
+
+            pmWrapper.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    // Preserve typed customer details across re-render
+                    const saved = getCustomerFieldValues();
+                    paymentMethod = e.target.value;
+                    renderCart();
+                    restoreCustomerFieldValues(saved);
+                });
+            });
+
             // --- Customer form + Pay button ---
+            const payLabel = paymentMethod === 'cod'
+                ? `Place Order — Pay ₹${grandTotal} on Delivery`
+                : `Pay ₹${grandTotal} — Secure Checkout`;
+
             formWrapper.innerHTML = `
               <div class="customer-form">
                 <h3>Delivery Details</h3>
@@ -424,13 +533,33 @@
                 </div>
               </div>
 
-              <button class="btn-pay" onclick="handlePayClick(${grandTotal})">
-                  Pay ₹${grandTotal} — Secure Checkout
+              <button class="btn-pay" onclick="handlePayClick()">
+                  ${payLabel}
               </button>
               <p class="pay-note">
-                  Payments secured by <a href="https://razorpay.com" target="_blank">Razorpay</a>.
-                  UPI · Cards · Wallets · Net Banking accepted.
+                  ${paymentMethod === 'cod'
+                    ? 'Pay with cash when your order arrives.'
+                    : 'Payments secured by <a href="https://razorpay.com" target="_blank">Razorpay</a>.'}
               </p>`;
+        }
+
+        // ===== Preserve form field values across re-render =====
+
+        function getCustomerFieldValues() {
+            return {
+                name: document.getElementById('cust-name')?.value || '',
+                phone: document.getElementById('cust-phone')?.value || '',
+                address: document.getElementById('cust-address')?.value || '',
+            };
+        }
+
+        function restoreCustomerFieldValues(vals) {
+            const nameEl = document.getElementById('cust-name');
+            const phoneEl = document.getElementById('cust-phone');
+            const addrEl = document.getElementById('cust-address');
+            if (nameEl) nameEl.value = vals.name;
+            if (phoneEl) phoneEl.value = vals.phone;
+            if (addrEl) addrEl.value = vals.address;
         }
 
         // ===== Cart actions (call renderCart after each) =====
@@ -459,7 +588,7 @@
 
         // ===== Pay button handler =====
 
-        function handlePayClick(total) {
+        function handlePayClick() {
             const name    = document.getElementById('cust-name')?.value.trim()    || '';
             const phone   = document.getElementById('cust-phone')?.value.trim()   || '';
             const address = document.getElementById('cust-address')?.value.trim() || '';
@@ -468,7 +597,11 @@
             if (!phone || phone.length < 10) { showToast('Please enter a valid phone number.'); return; }
             if (!address) { showToast('Please enter delivery address.'); return; }
 
-            startPayment(total, name, phone, address);
+            if (paymentMethod === 'cod') {
+                startCodOrder(name, phone, address);
+            } else {
+                startPayment(name, phone, address);
+            }
         }
 
         // Initial render

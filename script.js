@@ -6,9 +6,12 @@
 // -------------------------------------------------------
 //  CONFIG
 // -------------------------------------------------------
-// URL of your backend server (server.js).
-// While testing locally, this is usually http://localhost:3000
-const SERVER_URL = 'http://localhost:3000';
+// Empty string = relative path. Your API lives at /api/...
+// on the SAME domain as the frontend (Vercel serves both),
+// so we never hardcode localhost or any other host here.
+// This works identically whether you're running locally
+// with `vercel dev` or live in production.
+const SERVER_URL = '';
 
 // -------------------------------------------------------
 //  Cart State (persisted in localStorage)
@@ -241,11 +244,13 @@ function confirmOrder() {
 //  Razorpay Payment (called from cart.html)
 //  Full flow:
 //    1. Ask our server to create a Razorpay order
+//       (server recalculates the total itself — it does
+//       NOT trust any amount sent from the browser)
 //    2. Open Razorpay popup with that order_id
 //    3. On success, send payment details to our server to verify
-//    4. Server confirms → show success screen
+//    4. Server confirms → notifies shop on Telegram → show success screen
 // -------------------------------------------------------
-async function startPayment(totalAmount, customerName, customerPhone, customerAddress) {
+async function startPayment(customerName, customerPhone, customerAddress) {
     const cart = getCart();
 
     try {
@@ -254,7 +259,6 @@ async function startPayment(totalAmount, customerName, customerPhone, customerAd
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                amount: totalAmount,
                 customer: { name: customerName, phone: customerPhone, address: customerAddress },
                 items: cart,
             }),
@@ -262,7 +266,7 @@ async function startPayment(totalAmount, customerName, customerPhone, customerAd
 
         const orderData = await createRes.json();
         if (!orderData.success) {
-            showToast('Could not start payment. Please try again.');
+            showToast(orderData.error || 'Could not start payment. Please try again.');
             return;
         }
 
@@ -298,7 +302,7 @@ async function startPayment(totalAmount, customerName, customerPhone, customerAd
 
     } catch (err) {
         console.error('Payment start error:', err);
-        showToast('Server not reachable. Is your backend running?');
+        showToast('Server not reachable. Please try again.');
     }
 }
 
@@ -330,7 +334,6 @@ async function verifyPayment(response) {
 function onPaymentSuccess(paymentId) {
     // Clear cart
     localStorage.removeItem('rd_cart');
-    // Redirect to a success message (we do it inline in cart.html)
     const cartMain = document.getElementById('cart-main');
     if (cartMain) {
         cartMain.innerHTML = `
@@ -341,6 +344,65 @@ function onPaymentSuccess(paymentId) {
             </h2>
             <p style="color:var(--text-secondary);font-size:1.1rem;margin-bottom:6px;">
               Payment ID: <strong>${paymentId}</strong>
+            </p>
+            <p style="color:var(--text-secondary);font-size:1rem;margin-bottom:30px;">
+              Thank you for choosing Radhey Dairy. Your fresh order is on its way!
+            </p>
+            <a href="index.html" style="
+              background:var(--primary);color:#fff;
+              padding:12px 32px;border-radius:999px;
+              font-size:1rem;font-weight:500;
+              text-decoration:none;display:inline-block;">
+              Back to Home
+            </a>
+          </div>`;
+    }
+}
+
+// -------------------------------------------------------
+//  Cash on Delivery (called from cart.html)
+//  No payment to verify — but the server still recalculates
+//  the entire total itself, so nothing from the browser
+//  (price, quantity, handling charge) is ever trusted.
+// -------------------------------------------------------
+async function startCodOrder(customerName, customerPhone, customerAddress) {
+    const cart = getCart();
+
+    try {
+        const res = await fetch(SERVER_URL + '/api/cod-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                customer: { name: customerName, phone: customerPhone, address: customerAddress },
+                items: cart,
+            }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            onCodSuccess(data.total);
+        } else {
+            showToast(data.error || 'Could not place order. Please try again.');
+        }
+    } catch (err) {
+        console.error('COD order error:', err);
+        showToast('Server not reachable. Please try again.');
+    }
+}
+
+function onCodSuccess(total) {
+    localStorage.removeItem('rd_cart');
+    const cartMain = document.getElementById('cart-main');
+    if (cartMain) {
+        cartMain.innerHTML = `
+          <div style="text-align:center;padding:80px 20px;">
+            <div style="font-size:4rem;margin-bottom:20px;">📦</div>
+            <h2 style="font-family:var(--font-heading);font-size:2rem;color:var(--text-h1);margin-bottom:10px;">
+              Order Placed!
+            </h2>
+            <p style="color:var(--text-secondary);font-size:1.1rem;margin-bottom:6px;">
+              Please keep <strong>₹${total}</strong> ready for the delivery person.
             </p>
             <p style="color:var(--text-secondary);font-size:1rem;margin-bottom:30px;">
               Thank you for choosing Radhey Dairy. Your fresh order is on its way!
