@@ -23,11 +23,15 @@ const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 const TELEGRAM_BOT_TOKEN  = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID    = process.env.TELEGRAM_CHAT_ID;
 
-const razorpay = new Razorpay({
-    key_id: RAZORPAY_KEY_ID,
-    key_secret: RAZORPAY_KEY_SECRET,
-});
-
+function getRazorpayClient() {
+    if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+        throw new Error('Razorpay env vars not set');
+    }
+    return new Razorpay({
+        key_id: RAZORPAY_KEY_ID,
+        key_secret: RAZORPAY_KEY_SECRET,
+    });
+}
 // -------------------------------------------------------
 //  PRICE MAP — SOURCE OF TRUTH. The server recalculates
 //  every order total from THIS, never from what the
@@ -189,6 +193,7 @@ module.exports = async (req, res) => {
             const total = result.subtotal + delivery;
             const amountInPaise = Math.round(total * 100);
 
+            const razorpay = getRazorpayClient();
             const rzpOrder = await razorpay.orders.create({
                 amount: amountInPaise,
                 currency: 'INR',
@@ -240,6 +245,7 @@ module.exports = async (req, res) => {
             }
 
             // Pull order details back from Razorpay's notes field
+            const razorpay = getRazorpayClient();
             const order = await razorpay.orders.fetch(razorpay_order_id);
             const notes = order.notes || {};
             const subtotal = parseInt(notes.subtotal, 10) || 0;
