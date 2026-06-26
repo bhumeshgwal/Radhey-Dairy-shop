@@ -243,6 +243,7 @@ module.exports = async (req, res) => {
             if (!isValid) {
                 return res.status(400).json({ success: false, error: 'Payment verification failed' });
             }
+ 
 
             // Pull order details back from Razorpay's notes field
             const razorpay = getRazorpayClient();
