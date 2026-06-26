@@ -57,12 +57,16 @@ const GRAM_RATE_PER_100G = {
 //     in your addToCart('Name', price) call for milk items.
 // -------------------------------------------------------
 const FIXED_PRICE_PRODUCTS = {
-    // TODO — fill these in to match your milk product cards, e.g.:
-    // '500ml Milk': 25,
-    // '1L Milk': 48,
-    // '1L Toned Milk': 45,
-    // '2L Milk': 92,
-    // '2L Toned Milk': 88,
+    'Premium Milk__2L':    125,
+    'Toned Milk__2L':      110,
+    'Premium Milk__1L':     65,
+    'Toned Milk__1L':       55,
+    'Coca-Cola__750ml':     40,
+    'Sprite__750ml':        40,
+    'Fanta__750ml':         40,
+    'Thums Up__750ml':      40,
+    'Limca__750ml':         40,
+    'Mountain Dew__750ml':  40,
 };
 
 const COD_HANDLING_CHARGE = 5;
@@ -83,8 +87,9 @@ function getExpectedItemPrice(item) {
         return Math.round((grams / 100) * rate);
     }
 
-    if (Object.prototype.hasOwnProperty.call(FIXED_PRICE_PRODUCTS, item.name)) {
-        return FIXED_PRICE_PRODUCTS[item.name];
+    const key = item.name + '__' + (item.unit || '');
+    if (Object.prototype.hasOwnProperty.call(FIXED_PRICE_PRODUCTS, key)) {
+        return FIXED_PRICE_PRODUCTS[key];
     }
 
     return null;
